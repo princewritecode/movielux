@@ -1,9 +1,16 @@
 import { useState, useEffect } from 'react';
-
-const Header = () =>
+import { signOut } from 'firebase/auth';
+import { auth } from '../utils/firebase';
+import { useNavigate } from 'react-router';
+import { useSelector } from 'react-redux';
+const Header = (props) =>
 {
+    const navigate = useNavigate();
     const [isScrolled, setIsScrolled] = useState(false);
-
+    const user = useSelector(state => state.user);
+    console.log(user);
+    console.log(props);
+    const { value } = props;
     useEffect(() =>
     {
         const handleScroll = () =>
@@ -43,10 +50,21 @@ const Header = () =>
                         </svg>
                     </div>
                 </div>
-
+                {user && <p>{user.displayName}</p>}
                 {/* The "Best Ever" CTA Button */}
-                <button className="bg-[#E50914] text-white text-sm font-semibold px-5 py-1.5 rounded-md hover:bg-[#c10712] transition-all duration-200 shadow-lg active:scale-95 md:px-6 md:py-2 md:text-base">
-                    Sign In
+                <button onClick={() =>
+                {
+                    signOut(auth).then(() =>
+                    {
+                        // Sign-out successful.
+                        navigate('/');
+                    }).catch((error) =>
+                    {
+                        console.log(error.message);
+                        // An error happened.
+                    });
+                }} className="bg-[#E50914] text-white text-sm font-semibold px-5 py-1.5 rounded-md hover:bg-[#c10712] transition-all duration-200 shadow-lg active:scale-95 md:px-6 md:py-2 md:text-base">
+                    {value ? 'sign out' : 'sign in'}
                 </button>
             </div>
         </header>

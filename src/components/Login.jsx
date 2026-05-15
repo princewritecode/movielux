@@ -3,14 +3,19 @@ import Header from './Header';
 import checkValid from '../utils/validate';
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from '../utils/firebase';
+import { useDispatch } from 'react-redux';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router';
+import { updateProfile } from 'firebase/auth';
+import { addUser } from '../utils/userSlice';
 const Login = () =>
 {
     const [isSignInForm, setIsSignInForm] = useState(true);
     const [errorMessage, setErrorMessage] = useState(null);
     const email = useRef(null);
     const password = useRef(null);
+    const name = useRef(null);
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const toggleSignInForm = () =>
@@ -32,9 +37,22 @@ const Login = () =>
                 {
                     // Signed up
                     const user = userCredential.user;
+                    updateProfile(user, {
+                        displayName: name.current.value, photoURL: "https://example.com/jane-q-user/profile.jpg"
+                    }).then(() =>
+                    {
+                        // Profile updated!
+                        const { uid, email, displayName } = auth.currentUser;
+                        dispatch(addUser({ uid, email, displayName }));
+                        // ...
+                    }).catch((error) =>
+                    {
+                        // An error occurred
+                        setErrorMessage(error.message);
+                        // ...
+                    });
                     console.log(user);
                     navigate('/browse');
-
                     // ...
                 })
                 .catch((error) =>
@@ -87,6 +105,7 @@ const Login = () =>
                     <div className="space-y-4">
                         {!isSignInForm && (
                             <input
+                                ref={name}
                                 type="text"
                                 placeholder="Full Name"
                                 className="w-full rounded bg-[#333] px-5 py-4 outline-none focus:ring-2 focus:ring-gray-400 transition-all placeholder:text-gray-400"
