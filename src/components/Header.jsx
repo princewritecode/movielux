@@ -3,23 +3,53 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../utils/firebase';
 import { useNavigate } from 'react-router';
 import { useSelector } from 'react-redux';
+import { onAuthStateChanged } from 'firebase/auth';
+import { useDispatch } from 'react-redux';
+import { addUser, removeUser } from '../utils/userSlice';
 const Header = (props) =>
 {
     const navigate = useNavigate();
     const [isScrolled, setIsScrolled] = useState(false);
     const user = useSelector(state => state.user);
+    const dispatch = useDispatch();
     console.log(user);
     console.log(props);
     const { value } = props;
+
+
     useEffect(() =>
     {
-        const handleScroll = () =>
+
+
+        const unsubscribe = onAuthStateChanged(auth, (user) =>
         {
-            setIsScrolled(window.scrollY > 0);
-        };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+            if (user)
+            {
+                // User is signed in, see docs for a list of available properties
+                // https://firebase.google.com/docs/reference/js/auth.user
+                const { uid, email, displayName } = user;
+                dispatch(addUser({ uid, email, displayName }));
+                navigate('/browse');
+                // ...
+            } else
+            {
+                // User is signed out
+                dispatch(removeUser());
+                navigate('/');
+                // ...
+            }
+            return () => unsubscribe();
+        }
+        );
+
     }, []);
+
+
+    const handleGptClick = () =>
+    {
+        console.log('working');
+    };
+
 
     return (
         <header
@@ -50,7 +80,11 @@ const Header = (props) =>
                         </svg>
                     </div>
                 </div>
-                {user && <p>{user.displayName}</p>}
+                {user && (<>
+                    <p className='text-amber-50'>{user.displayName}</p>
+                    <button onClick={handleGptClick} className='bg-[#E50914]  text-white text-sm font-semibold px-5 py-1.5 rounded-md hover:bg-[#c10712] transition-all duration-200 shadow-lg active:scale-95 md:px-6 md:py-2 md:text-base'>Gpt search</button>
+
+                </>)}
                 {/* The "Best Ever" CTA Button */}
                 <button onClick={() =>
                 {
@@ -61,6 +95,7 @@ const Header = (props) =>
                     }).catch((error) =>
                     {
                         console.log(error.message);
+                        navigate('/error');
                         // An error happened.
                     });
                 }} className="bg-[#E50914] text-white text-sm font-semibold px-5 py-1.5 rounded-md hover:bg-[#c10712] transition-all duration-200 shadow-lg active:scale-95 md:px-6 md:py-2 md:text-base">
