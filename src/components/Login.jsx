@@ -5,7 +5,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from '../utils/firebase';
 import { useDispatch } from 'react-redux';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { useNavigate } from 'react-router';
+
 import { updateProfile } from 'firebase/auth';
 import { addUser } from '../utils/userSlice';
 const Login = () =>

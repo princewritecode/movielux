@@ -6,17 +6,18 @@ import { useSelector } from 'react-redux';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useDispatch } from 'react-redux';
 import { addUser, removeUser } from '../utils/userSlice';
+import { toggleGptSearchView } from '../utils/gptSlice';
 const Header = (props) =>
 {
     const navigate = useNavigate();
-    const [isScrolled, setIsScrolled] = useState(false);
+    const [isScrolled] = useState(false);
     const user = useSelector(state => state.user);
     const dispatch = useDispatch();
+    const showGptSearch = useSelector((store) => store.gpt.showGptSearch);
+    console.log(showGptSearch, 'show gpt search');
     console.log(user);
     console.log(props);
     const { value } = props;
-
-
     useEffect(() =>
     {
 
@@ -43,14 +44,11 @@ const Header = (props) =>
         );
 
     }, []);
-
-
     const handleGptClick = () =>
     {
-        console.log('working');
+        dispatch(toggleGptSearchView());
+
     };
-
-
     return (
         <header
             className={`fixed top-0 z-50 flex w-full items-center justify-between px-6 py-4 transition-all duration-700 lg:px-16 lg:py-6 ${isScrolled
@@ -64,10 +62,8 @@ const Header = (props) =>
                     MOVIELUX
                 </h1>
             </div>
-
             {/* Right Side: Language & Sign In */}
             <div className="flex items-center space-x-3 md:space-x-6">
-
                 {/* Optional Language Selector (Modern Look) */}
                 <div className="relative hidden sm:block">
                     <select className="appearance-none bg-black/30 border border-gray-500 text-white text-sm py-1.5 pl-8 pr-4 rounded-md focus:outline-none focus:ring-1 focus:ring-white transition cursor-pointer">
@@ -83,20 +79,16 @@ const Header = (props) =>
                 {user && (<>
                     <p className='text-amber-50'>{user.displayName}</p>
                     <button onClick={handleGptClick} className='bg-[#E50914]  text-white text-sm font-semibold px-5 py-1.5 rounded-md hover:bg-[#c10712] transition-all duration-200 shadow-lg active:scale-95 md:px-6 md:py-2 md:text-base'>Gpt search</button>
-
                 </>)}
-                {/* The "Best Ever" CTA Button */}
                 <button onClick={() =>
                 {
                     signOut(auth).then(() =>
                     {
-                        // Sign-out successful.
                         navigate('/');
                     }).catch((error) =>
                     {
                         console.log(error.message);
                         navigate('/error');
-                        // An error happened.
                     });
                 }} className="bg-[#E50914] text-white text-sm font-semibold px-5 py-1.5 rounded-md hover:bg-[#c10712] transition-all duration-200 shadow-lg active:scale-95 md:px-6 md:py-2 md:text-base">
                     {value ? 'sign out' : 'sign in'}
